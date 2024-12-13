@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>主页</title>
+    <style>
+        body{
+            background-image:url("{{ url_for('static',filename='img/知更鸟主图.jpg') }}");
+            margin: 0; /* 移除默认的边距 */
+            padding: 0; /* 移除默认的内边距 */
+            background-size: cover; /* 让背景图片覆盖整个body */
+            background-repeat: no-repeat; /* 防止背景图片重复 */
+        }
+    </style>
+
+    <!-- 导入JavaScript文件 -->
+    <script src="{{ url_for('static', filename='layui/layui.js') }}"></script>
+    <script src="{{ url_for('static', filename='jquery/jquery.js') }}"></script>
+
+    <!-- 导入CSS文件 -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='layui/css/layui.css') }}">
+
+
+</head>
+<body>
+<p> 主页 </p>
+<br>
+<div>
+    {% if current_user.is_authenticated %}
+      Hi {{ current_user.user_name }}!
+    {% endif %}
+</div>
+<br>
+<div class="layui-row">
+    <div class="layui-container">
+        <div class="layui-col-md8">
+            <div class="grid-demo grid-demo-bg1">   1</div>
+        </div>
+        <div class="layui-col-md3 layui-anim-down" style="background: rgba(255,242,254,0.6);">
+            <div class="grid-demo">欢迎 {{ current_user.user_name }}！ </div>
+        </div>
+        <div class="layui-col-md1">
+            <div class="grid-demo">   </div>
+        </div>
+    </div>
+</div>>
+
+
+</body>
+</html>
