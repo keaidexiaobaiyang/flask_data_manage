@@ -22,8 +22,26 @@ class Productpnl(db.Model):
     店铺名称 = db.Column(db.String(30), nullable=False)
     产品名称 = db.Column(db.String(40))
     商品id = db.Column(db.String(40), nullable=False)
+    访客数 = db.Column(db.Integer, nullable=False)
+    支付件数 = db.Column(db.Integer, nullable=False)
+    支付买家数 = db.Column(db.Integer, nullable=False)
+    支付金额 = db.Column(db.Numeric(precision=10,scale=3), nullable=False)
+    评价有礼 = db.Column(db.Numeric(precision=6,scale=2), nullable=False)
     单日盈亏 = db.Column(db.Numeric(precision=10, scale=2), nullable=False)
-    #email = db.Column(db.String(120), unique=True, nullable=False)
 
-    def __repr__(self):
-        return fr'{self.日期} {self.店铺名称} {self.商品id} {self.单日盈亏}'
+    def to_dict(self):
+        return {
+            'id': self.id,
+            '日期': str(self.日期),  # 将日期转换为字符串
+            '店铺名称': self.店铺名称,
+            '产品名称': self.产品名称,
+            '商品id': self.商品id,
+            '访客数': self.访客数,
+            '支付件数': self.支付件数,
+            '支付买家数': self.支付买家数,
+            '支付金额': float(self.支付金额),  # 将 Decimal 转换为 float
+            '评价有礼': float(self.评价有礼),  # 将 Decimal 转换为 float
+            '单日盈亏': float(self.单日盈亏)   # 将 Decimal 转换为 float
+        }
+
+

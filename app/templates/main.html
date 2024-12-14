@@ -4,14 +4,43 @@
     <meta charset="UTF-8">
     <title>主页</title>
     <style>
-        body{
-            background-image:url("{{ url_for('static',filename='img/知更鸟主图.jpg') }}");
-            margin: 0; /* 移除默认的边距 */
-            padding: 0; /* 移除默认的内边距 */
-            background-size: cover; /* 让背景图片覆盖整个body */
-            background-repeat: no-repeat; /* 防止背景图片重复 */
+        /*body: {
+            background: url("{{ url_for('static',filename='img/知更鸟主图.jpg') }}");
+            margin: 0;
+            padding: 0;
+            background-size: cover;
+            background-repeat: no-repeat;
+        }*/
+        .ws-logo {
+            height: 100%; /* 容器宽度为100%，适应父容器 */
+            max-width: 200px; /* 最大宽度为200px */
+            margin: 0 auto;
         }
+
+        .ws-logo img {
+            max-width: 100%; /* 图片的最大宽度为容器的宽度 */
+            height: auto; /* 保持图片的原始宽高比 */
+          }
+
+          @media (max-width: 600px) {
+              .ws-logo {
+              max-width: 150px; /* 在小屏幕设备上，最大宽度为150px */
+              }
+          }
+
+        /* styles.css */
+        .fullscreen-container {
+            width: 90vw; /* 视口宽度的90% */
+            height: 90vh; /* 视口高度的90% */
+            background-color: rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
     </style>
+
 
     <!-- 导入JavaScript文件 -->
     <script src="{{ url_for('static', filename='layui/layui.js') }}"></script>
@@ -23,27 +52,90 @@
 
 </head>
 <body>
-<p> 主页 </p>
-<br>
-<div>
-    {% if current_user.is_authenticated %}
-      Hi {{ current_user.user_name }}!
-    {% endif %}
-</div>
-<br>
-<div class="layui-row">
-    <div class="layui-container">
-        <div class="layui-col-md8">
-            <div class="grid-demo grid-demo-bg1">   1</div>
-        </div>
-        <div class="layui-col-md3 layui-anim-down" style="background: rgba(255,242,254,0.6);">
-            <div class="grid-demo">欢迎 {{ current_user.user_name }}！ </div>
-        </div>
-        <div class="layui-col-md1">
-            <div class="grid-demo">   </div>
+    <div id="background" style="position:fixed; left:0px; top:0px; width:100%; height:100%;opacity:1">
+        <img src="{{ url_for('static',filename='img/知更鸟主图.jpg') }}" width="100%" height="100%" alt="背景图片"/>
+    </div>
+
+    <div class="layui-header" style="position:fixed; left:0px; top:0px; width:100%; height:8%;opacity:1">
+        <div class="layui-container layui-bg-gray" style="width: 100%;height: 100%">
+            <div class="layui-col-md5" style="height: 100%">
+                <div class="ws-logo">
+                    <a class="logo" href="/">
+                        <img src="//res.layui.dev/static/images/layui/logo.png" alt="layui" style="height: 100%">
+                    </a>
+                </div>
+            </div>
+
+            <div class="layui-col-md4" style="height: 100%">
+                <div class="layui-header-menu">
+                    <ul class="layui-nav layui-bg-gray">
+
+                        <li class="layui-nav-item layui-this"><a href="/home">首页</a></li>
+                        <li class="layui-nav-item">
+                            <a href="javascript:;">常规</a>
+                        </li>
+                        <li class="layui-nav-item"><a href="">导航</a></li>
+                        <li class="layui-nav-item">
+                            <a href="javascript:;">子级</a>
+                            <dl class="layui-nav-child">
+                                <dd><a href="">菜单1</a></dd>
+                                <dd><a href="">菜单2</a></dd>
+                                <dd><a href="">菜单3</a></dd>
+                            </dl>
+                        </li>
+
+                        <li class="layui-nav-item">
+                            <a href="javascript:;">选项</a>
+                            <dl class="layui-nav-child">
+                                <dd><a href="">选项1</a></dd>
+                                <dd class="layui-this"><a href="">选项2</a></dd>
+                                <dd><a href="">选项3</a></dd>
+                            </dl>
+                        </li>
+                        <li class="layui-nav-item"><a href="">演示</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="layui-col-md3" style="height: 100%">
+                <ul class="layui-nav layui-bg-gray">
+                    <li class="layui-nav-item">
+
+                        <a href="javascript:;">
+                            <img src="{{ url_for('static',filename='img/流萤头像.png') }}" class="layui-nav-img">
+                            <i class="layui-icon layui-icon-down layui-nav-more">{{ user.user_name }}</i>
+                        </a>
+
+
+                        <dl class="layui-nav-child">
+                          <dd><a href="javascript:;">个人中心</a></dd>
+                          <dd><a href="https://sr.mihoyo.com/">崩坏星穹铁道友情链接</a></dd>
+                          <hr>
+                          <dd style="text-align: center;"><a href="{{ url_for('login.loginout') }}">退出</a></dd>
+                        </dl>
+
+                    </li>
+                </ul>
+            </div>
+
+
+
         </div>
     </div>
-</div>>
+
+    <div class="body-container" style="margin-top: 12vh;margin-bottom: 4vh ;height: 84vh;margin-left: 3%;margin-right: 3% ;width: 94%;align-items: center;text-align: center;">
+
+        <div class="layui-col-md6" style="height: 100%">
+            <h1>{{ datetime }}</h1>
+            <p>!!! >_< !!!</p>
+        </div>
+
+        <div class="layui-col-md6" style="background-color: rgba(255,255,255,0.6);height: 100%">
+            <h2> 欢迎：{{ user.user_name }} </h2>
+            <h4> 今日日期是:{{ date }} </h4>
+            <p> 您昨日的总收入为：<em>{{ data.profit.day }}</em>;<br> 本周收入：<em>{{ data.profit.week }}</em>;<br> 本月收入：<em>{{ data.profit.month }}</em><br>详细数据请查看<a target="_blank" href="{{ url_for('showdata.showdata') }}">盈亏报表</a></p>
+        </div>
+    </div>
 
 
 </body>

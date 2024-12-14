@@ -48,3 +48,9 @@ def return_user():
     print([[i.owner,i.user_name,i.user_password] for i in users])
     print(users)
     return str(users)
+
+@login_bp.route('/loginout')
+@login_required
+def loginout():
+    logout_user()
+    return redirect(url_for('main.index'))
