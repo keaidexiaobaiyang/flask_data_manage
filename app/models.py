@@ -27,6 +27,7 @@ class Productpnl(db.Model):
     支付买家数 = db.Column(db.Integer, nullable=False)
     支付金额 = db.Column(db.Numeric(precision=10,scale=3), nullable=False)
     评价有礼 = db.Column(db.Numeric(precision=6,scale=2), nullable=False)
+    退款金额 = db.Column(db.Numeric(precision=10,scale=2), nullable=False)
     单日盈亏 = db.Column(db.Numeric(precision=10, scale=2), nullable=False)
 
     def to_dict(self):
@@ -41,7 +42,8 @@ class Productpnl(db.Model):
             '支付买家数': self.支付买家数,
             '支付金额': float(self.支付金额),  # 将 Decimal 转换为 float
             '评价有礼': float(self.评价有礼),  # 将 Decimal 转换为 float
-            '单日盈亏': float(self.单日盈亏)   # 将 Decimal 转换为 float
+            '退款金额': float(self.退款金额),
+            '单日盈亏': float(self.单日盈亏),  # 将 Decimal 转换为 float
         }
 
 

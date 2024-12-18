@@ -30,8 +30,18 @@
 
         </div>
         <div class="layui-col-md4" style="background: rgba(255,255,255,0.3);">
-            <form class="layui-form">
 
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <ul>
+                        {% for message in messages %}
+                            <li>{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+
+            <form class="layui-form">
                 <div class="demo-login-container">
                     <div class="layui-form-item">
                           <div class="layui-input-wrap">
@@ -100,7 +110,6 @@
       var post_data=JSON.stringify(field)
       console.log(JSON.stringify(post_data))
       //const post_data = "{\"username\":\"awdwad\",\"password\":\"adwwad\",\"captcha\":\"adwawd\",\"remember\":\"on\"}";
-
       var loginUrl = "{{ url_for('login.login') }}";
       $.ajax({
                 url: loginUrl,
@@ -108,15 +117,16 @@
                 contentType: 'application/json',
                 data: post_data,
                 success: function(response) {
-
                     if (response.redirect){
                         window.location.href = response.redirect;
                     }else{
-                        console.log('Success:', response);
+                        alert('登录失败\n错误信息: ' + JSON.stringify(response))
+                        console.log('Success:',response);
                     }
                 },
                 error: function(error) {
-                  console.error('Error:', error);
+                    alert('登录失败\n错误信息: ' + JSON.stringify(error))
+                    console.error('Error:', error);
                 }
               });
       //return false; // 阻止默认 form 跳转

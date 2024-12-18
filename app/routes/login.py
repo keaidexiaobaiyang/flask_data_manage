@@ -16,8 +16,7 @@ def login():
     #     return redirect(url_for('main.index'))
 
     if request.method == 'POST':
-        print(1)
-        print(json.loads(request.data))
+        #print(json.loads(request.data))
         data=json.loads(request.data)
         # username = request.form['username']
         # password = request.form['password']
@@ -35,8 +34,8 @@ def login():
                 return jsonify({'redirect':url_for('main.index')})
         else:
             print('账号密码错误')
-            flash('Invalid username or password')
-            return render_template('login.html')
+            flash('password error')
+            return '账号密码错误'
 
     return render_template('login.html')
 

@@ -2,6 +2,7 @@ from flask import Flask
 from .routes.login import login_bp
 from .routes.main import main_bp
 from .routes.showdata import showdata_bp
+from .routes.datahome import datahome_bp
 from .models import db,Users
 from .extensions import LoginManager
 #from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
@@ -33,6 +34,7 @@ def create_app():
     app.register_blueprint(login_bp)
     app.register_blueprint(main_bp)
     app.register_blueprint(showdata_bp)
+    app.register_blueprint(datahome_bp)
 
 
     return app
