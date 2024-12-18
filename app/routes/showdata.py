@@ -47,12 +47,13 @@ def getdata():
                                                 Productpnl.日期 >= start_date,
                                                 Productpnl.日期 <= end_date,
                                                 *filters,
-                                                )).order_by().paginate(page=int(page), per_page=int(limit) )
+                                                )).order_by(Productpnl.日期.desc()).paginate(page=int(page), per_page=int(limit) )
 
 
         result_data={
             "code": 0,
             "msg": "",
+
             "count": sp_data.total,
             "data": [i.to_dict() for i in sp_data.items]
         }

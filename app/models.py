@@ -2,18 +2,37 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 db = SQLAlchemy()
 
+
+
 class Users(UserMixin,db.Model):
     user_id=db.Column(db.Integer, primary_key=True)
     user_name=db.Column(db.String(60), nullable=False)
     user_password=db.Column(db.String(100), nullable=False)
+    user_level = db.Column(db.String(50), nullable=False)
     create_time=db.Column(db.DateTime)
-    owner=db.Column(db.String(20), db.ForeignKey('user.user_id'))
+    father_name = db.Column(db.String(60), nullable=False)
+    permision_level = db.Column(db.String(60), nullable=False)
+    owner=db.Column(db.String(20) )
 
     def __init__(self):
         pass
 
     def get_id(self):
         return self.user_id
+
+class ShopConfig(db.Model):
+    __tablename__='shop_config'
+    id = db.Column(db.Integer, primary_key=True)
+    shop_name = db.Column(db.String(60), nullable=False)
+    create_time = db.Column(db.DateTime)
+    create_user = db.Column(db.String(60),db.ForeignKey('Users.user_name'))
+    owner=db.Column(db.String(20),db.ForeignKey('Users.user_name'))
+
+
+class ProductConfig(db.Model):
+    __tablename__='product_config'
+    id = db.Column(db.Integer, primary_key=True)
+
 
 class Productpnl(db.Model):
     __tablename__='productpnl'
@@ -45,5 +64,17 @@ class Productpnl(db.Model):
             '退款金额': float(self.退款金额),
             '单日盈亏': float(self.单日盈亏),  # 将 Decimal 转换为 float
         }
+
+
+def create_shop(shop_name):
+    class Shop_Temp(db.Model):
+        __tablename__=shop_name
+        id = db.Column(db.Integer, primary_key=True)
+        product_id = db.Column(db.Integer, db.ForeignKey('productpnl.pid'))
+        create_time = db.Column(db.DateTime)
+        create_user = db.Column(db.String(60),db.ForeignKey('menber_ship.user_name'))
+        owner=db.Column(db.String(20), db.ForeignKey('member_ship.user_name'))
+    return  Shop_Temp
+
 
 
