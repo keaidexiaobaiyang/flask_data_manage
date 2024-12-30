@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template,request,redirect,url_for,jsonify
 from flask_login import login_required,current_user
-from app.models import Users,Productpnl
+from app.models import users,Productpnl
 from sqlalchemy import and_
 import datetime
 

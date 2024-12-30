@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>管理中心</title>
+  <!-- 请勿在项目正式环境中引用该 layui.css 地址 -->
+  <link href="//unpkg.com/layui@2.9.21-rc/dist/css/layui.css" rel="stylesheet">
+</head>
+<body>
+
+<table class="layui-hide" id="ID-treeTable-demo" style="margin: auto"></table>
+
+<script type="text/html" id="TPL-treeTable-demo">
+  <div class="layui-btn-container">
+    <button class="layui-btn layui-btn-sm" lay-event="getChecked">获取选中数据</button>
+  </div>
+</script>
+
+<script type="text/html" id="TPL-treeTable-demo-tools">
+  <div class="layui-btn-container">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">查看</a>
+    <a class="layui-btn layui-btn-warm layui-btn-xs" lay-event="addChild">新增</a>
+    <a class="layui-btn layui-btn-xs" lay-event="more">更多 <i class="layui-icon layui-icon-down"></i></a>
+  </div>
+</script>
+
+<!-- 请勿在项目正式环境中引用该 layui.js 地址 -->
+<script src="{{ url_for('static', filename='layui/layui.js') }}"></script>
+<script src="{{ url_for('static', filename='jquery/jquery.js') }}"></script>
+
+    <!-- 导入CSS文件 -->
+<link rel="stylesheet" href="{{ url_for('static', filename='layui/css/layui.css') }}">
+<script>
+layui.use(function(){
+  var treeTable = layui.treeTable;
+  var layer = layui.layer;
+  var dropdown = layui.dropdown;
+  var url_data='{{ url_for("managehome.getusertree") }}'
+  // 渲染
+  var inst = treeTable.render({
+    elem: '#ID-treeTable-demo',
+    url: url_data, // 此处为静态模拟数据，实际使用时需换成真实接口
+    tree: {
+      idName: 'user_id', // 数据中节点的唯一标识字段名
+      childName: 'children', // 数据中子节点数组的字段名
+      showLine: true, // 是否显示连接线
+      iconIndex: 2 // 展开/折叠图标所在列索引，默认为 0
+    },
+    //maxHeight: '501px',
+    toolbar: '#TPL-treeTable-demo',
+    cols: [[
+      {type: 'checkbox', fixed: 'left'},
+      {field: 'user_id', title: 'ID', width: 80, sort: true, fixed: 'left'},
+        {field: 'name', title: '用户名', width: 180, fixed: 'left'},
+      {field: 'father_name', title: '上级', width: 80, sort: true},
+      {field: 'create_time', title: '创建时间', width: 180, sort: true},
+      {fixed: "right", title: "操作", width: 190, align: "center", toolbar: "#TPL-treeTable-demo-tools"}
+    ]],
+    page: true
+  });
+  // 表头工具栏工具事件
+
+});
+</script>
+
+</body>
+</html>

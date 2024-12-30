@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template,request,jsonify, redirect, url_for, flash
-from app.models import Users,Productpnl
+from app.models import users,Productpnl
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 import json
 login_bp = Blueprint('login', __name__)
@@ -20,7 +20,7 @@ def login():
         data=json.loads(request.data)
         # username = request.form['username']
         # password = request.form['password']
-        user = Users.query.filter_by(user_name=data['username'], user_password=data['password']).first()
+        user = users.query.filter_by(user_name=data['username'], user_password=data['password']).first()
         print(user)
         if user:
             login_user(user)
@@ -42,7 +42,7 @@ def login():
 
 @login_bp.route('/users')
 def return_user():
-    users = Users.query.all()
+    users = users.query.all()
     print(1,type(users))
     print([[i.owner,i.user_name,i.user_password] for i in users])
     print(users)

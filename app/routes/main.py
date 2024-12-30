@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for
 from flask_login import login_required, current_user
 import datetime
-from app.models import Users,Productpnl
+from app.models import users,Productpnl
 from app.extensions import login_manager
 from sqlalchemy import and_
 

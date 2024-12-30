@@ -1,19 +1,19 @@
 from flask import Blueprint, render_template,request,jsonify, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import login_required,current_user
-from app.models import Users,Productpnl
+from app.models import users,Productpnl
 from sqlalchemy import and_
 import datetime
 
 showdata_bp = Blueprint('showdata',__name__)
 
 @showdata_bp.route('/showdata')
-#@login_required
+@login_required
 def showdata():
     return render_template('showdata.html')
 
 @showdata_bp.route('/getdata',methods=['POST','GET'])
-#@login_required
+@login_required
 def getdata():
     if request.method == 'POST':
         pass
