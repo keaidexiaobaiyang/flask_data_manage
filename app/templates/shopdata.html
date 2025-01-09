@@ -131,13 +131,16 @@
     </div>
 
     <script>
-        layui.use(['table'],function (){
+        layui.use(['table','form'],function (){
             var table = layui.table;
+            var form = layui.form;
             var url_shop_data='{{ url_for("userhome.userhome_data") }}';
             table.render({
                 elem:'#shop_data',
                 url: url_shop_data,
                 total:true,
+                height: 'full-70',
+                page:true,
                 cols:[[
                     {field:'店铺名称',title:'店铺名称', width:240,totalRow: '',},
                     {field:'昨日收入',title:'昨日收入', width:120,totalRow: '', sort: true },

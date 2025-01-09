@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>管理中心</title>
+  <!-- 请勿在项目正式环境中引用该 layui.css 地址 -->
+  <link href="//unpkg.com/layui@2.9.21-rc/dist/css/layui.css" rel="stylesheet">
+</head>
+<body>
+
+<table class="layui-hide" id="user-tree" style="margin: auto"></table>
+
+<script type="text/html" id="treeTable-header">
+  <div class="layui-btn-container">
+    <button class="layui-btn layui-btn-sm" lay-event="getChecked">获取选中数据</button>
+  </div>
+</script>
+
+<script type="text/html" id="user-tree-tools">
+  <div class="layui-btn-container">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="commit">提交</a>
+    <a class="layui-btn layui-btn-warm layui-btn-xs" lay-event="addChild">新增</a>
+    <a class="layui-btn layui-btn-xs" lay-event="more">更多 <i class="layui-icon layui-icon-down"></i></a>
+  </div>
+</script>
+
+<!-- 请勿在项目正式环境中引用该 layui.js 地址 -->
+<script src="{{ url_for('static', filename='layui/layui.js') }}"></script>
+<script src="{{ url_for('static', filename='jquery/jquery.js') }}"></script>
+
+    <!-- 导入CSS文件 -->
+<link rel="stylesheet" href="{{ url_for('static', filename='layui/css/layui.css') }}">
+<script>
+layui.use(['treeTable'],function(){
+    var treeTable = layui.treeTable;
+    var layer = layui.layer;
+    var dropdown = layui.dropdown;
+    var url_data = '{{ url_for("managehome.getusertree") }}'
+    // 渲染
+    var inst = treeTable.render({
+        elem: '#user-tree',
+        url: url_data, // 此处为静态模拟数据，实际使用时需换成真实接口
+        tree: {
+            idName: 'user_id', // 数据中节点的唯一标识字段名
+            childName: 'children', // 数据中子节点数组的字段名
+            showLine: true, // 是否显示连接线
+            iconIndex: 2 // 展开/折叠图标所在列索引，默认为 0
+        },
+        //maxHeight: '501px',
+        toolbar: '#TPL-treeTable-demo',
+        cols: [[
+            {type: 'checkbox', fixed: 'left'},
+            {field: 'user_id', title: 'ID', width: 80, sort: true, fixed: 'left'},
+            {field: 'name', title: '用户名', width: 180, fixed: 'left',edit: 'text'},
+            {field:'user_level',title:'用户等级',width:120,fixed:'left'},
+            {field: 'father_name', title: '上级', width: 80, sort: true},
+            {field: 'create_time', title: '创建时间', width: 180, sort: true},
+            {fixed: "right", title: "操作", width: 190, align: "center", toolbar: "#user-tree-tools"}
+        ]],
+        page: true
+    });
+
+    //表头工具栏事件
+    treeTable.on('toolbar(treeTable-header)',function (obj) {
+        var config = obj.config;
+        var tableId = config.id;
+        var status = treeTable.checkStatus(tableId);
+        // 获取选中行
+        if (obj.event === "getChecked") {
+            if (!status.data.length) return layer.msg('无选中数据');
+            console.log(status);
+            layer.alert("当前数据选中已经输出到控制台，<br>您可按 F12 从控制台中查看结果。");
+        }
+    });
+    //行操作事件
+    treeTable.on('tool('+inst.config.id+')',function (obj) {
+        var layEvent = obj.event; // 获得 lay-event 对应的值
+        var trElem = obj.tr;
+        var trData = obj.data;
+        //console.log(trData)
+        var tableId = obj.config.id;
+        var level_dict={
+            '超级管理员':0,
+            '管理员':1,
+            '组长':2,
+            '组员':3,
+        }
+        var level_nx={
+            0:'超级管理员',
+            1:'管理员',
+            2:'组长',
+            3:'组员',
+        }
+        trData['user_level']=level_dict[trData.user_level]
+        var now = new Date();
+        var formatted = formatDateTime(now);
+        trData['create_time'] = formatted
+        if (layEvent === "commit") {
+            var now = new Date();
+            var formatted = formatDateTime(now);
+            var loginUrl='{{ url_for("managehome.getusertree") }}';
+            var post_data=JSON.stringify({
+                    'user_name':trData.name,
+                    'create_time':formatted,
+                    'father_name':trData.father_name,
+                    'user_level':trData.user_level,
+                    'user_id':trData.user_id,
+                });
+            $.ajax({
+                url: loginUrl,
+                type: 'POST',
+                contentType: 'application/json',
+                data: post_data,
+                success: function (response) {
+                    alert('提交成功\n反馈信息: ' + JSON.stringify(response))
+                    //console.log('Success:', response);
+                },
+                error: function (error) {
+                    alert('提交失败\n错误信息: ' + JSON.stringify(error.responseJSON))
+                    //console.error('Error:', error);
+                }
+            });
+        } else if (layEvent === "addChild") {
+            if (trData['user_level'] > 2){
+                layer.msg("您无权操作新增成员");
+            }else {
+                var data = {id: Date.now(), name: "新节点"};
+                var now = new Date();
+                var formatted = formatDateTime(now);
+                var newNode2 = treeTable.addNodes(tableId, {
+                    parentIndex: trData["LAY_DATA_INDEX"],
+                    index: -1,
+                    data: {
+                        'name': '请输入昵称',
+                        'father_name': trData.name,
+                        'create_time': formatted,
+                        'user_level':level_nx[trData.user_level+1],
+                        'user_id':0
+                    }
+                });
+            }
+        } else if (layEvent === "more") {
+            // 下拉菜单
+            dropdown.render({
+                elem: this, // 触发事件的 DOM 对象
+                show: true, // 外部事件触发即显示
+                align: "right", // 右对齐弹出
+                data: [
+                    {
+                        title: "修改积分",
+                        id: "edit"
+                    },
+                    {
+                        title: "删除",
+                        id: "del"
+                    }
+                ],
+                click: function (menudata) {
+                    if (menudata.id === "del") {
+                        layer.confirm("真的要删除"+trData.name+"么", function (index) {
+                            var loginUrl = '{{ url_for("managehome.deleteuser") }}';
+                            var post_data = JSON.stringify({
+                                'user_id': trData.user_id,
+                                'user_name':trData.name,
+                                'father_name':trData.father_name
+                            });
+                            $.ajax({
+                                url: loginUrl,
+                                type: 'POST',
+                                contentType: 'application/json',
+                                data: post_data,
+                                success: function (response) {
+                                    alert('删除成功\n反馈信息: ' + JSON.stringify(response))
+                                    if(response['status'] == 'success'){
+                                        obj.del();
+                                    }
+                                    //console.log('Success:', response);
+                                },
+                                error: function (error) {
+                                    alert('删除失败\n错误信息: ' + JSON.stringify(error))
+                                    //console.error('Error:', error);
+                                }
+                            });
+                            // treeTable.removeNode(tableId, trElem.attr('data-index'))
+                            layer.close(index);
+                        });
+                    } else if (menudata.id === "edit") {
+                        layer.prompt({
+                            value: trData.experience,
+                            title: "输入新的积分"
+                        }, function (value, index) {
+                            obj.update({experience: value}); // 等效如下
+                            // treeTable.updateNode(tableId, trElem.attr('data-index'), {experience: value});
+                            layer.close(index);
+                        });
+                    }
+                }
+            });
+        }
+    });
+
+    function formatDateTime(date) {
+        var year = date.getFullYear();
+        var month = (date.getMonth() + 1).toString().padStart(2, '0'); // 月份从0开始，所以加1
+        var day = date.getDate().toString().padStart(2, '0');
+        var hours = date.getHours().toString().padStart(2, '0');
+        var minutes = date.getMinutes().toString().padStart(2, '0');
+        var seconds = date.getSeconds().toString().padStart(2, '0');
+
+        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    }
+});
+</script>
+
+</body>
+</html>

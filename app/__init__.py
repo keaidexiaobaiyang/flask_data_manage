@@ -9,6 +9,7 @@ from .models import db,users
 from .extensions import LoginManager
 #from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from app.models import users
+from sqlalchemy import inspect
 import secrets
 
 login_manager = LoginManager()
@@ -30,6 +31,7 @@ def create_app():
     with app.app_context():
         # 在这里执行需要应用上下文的操作
         db.create_all()
+
 
     login_manager.init_app(app)
     login_manager.login_view = 'login.login'  # 设置未登录时重定向的视图

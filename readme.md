@@ -10,10 +10,10 @@
         (3)login.loginout:推出当前推出的用户
     3、管理中心(managehome.py):
         (1)managehome.managehome:返回管理中心的html文件。
-        (2)managehome.getusertree:如果是get请求，则返回当前用户和用户所有的子、孙节点。
+        (2)managehome.getusertree:如果是get请求，则返回当前用户和用户所有的子、孙节点。如果是post请求，则按照对应的请求更改对应的行数据到数据库。
         (3)managehome.changeuser:更改用户数据的请求。（待制作）
-        (4)店铺管理：待制作
-        (5)修改数据库功能。
+        (4)managehome.deleteuser：post，删除对应的行，如果有关联其他的表则会报错。
+        (5)managehome。
     4、数据中心(data.py)：
         (1)datahome.datahome:暂时没用上
         (2)datahome.get_data:获取数据从数据库中，包含有产品id参数、获取的数量、获取的列属性。
@@ -22,7 +22,7 @@
         (1)showdata.showdata:返回数据展示界面。
         (2)showdata.getdata:数据展示界面的初始化数据。
     6、用户中心(userhome):
-        (1)userhome.userhome:返回用户中心html界面。
+        (1)userhome.shopdata:返回用户中心html界面。
         (2)userhome.userhome_data:返回用户中心初始化需要的数据。
 网站静态网站：
     1、main.html:返回的主界面。
@@ -31,5 +31,6 @@
     4、datahome:数据中心界面。（没做）
     5、showdata:盈亏表数据展示界面。
     6、data_ZG：盈亏表折线图展示界面。
-    7、user_home:用户中心，展示和用户有关的信息。（没有数据筛选功能）
+    7、user_home:用户中心，展示和用户有关的信息。（还没做）
+    8、shopdata：展示自己的店铺数据（暂时没有数据筛选功能）
     8、warning:展示警告界面。

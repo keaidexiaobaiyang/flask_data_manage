@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>管理中心</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            list-style: none;
+            text-decoration: none;
+        }
+
+        body {
+            background: #e4e9f5;
+        }
+
+        #main-container {
+            transition: margin-left 0.5s ease; /* 添加过渡效果，持续时间为0.5秒，使用ease缓动函数 */
+        }
+
+        section {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font: 900 100px '';
+            color: rgba(110, 90, 240, 0.3);
+            background: #e4e9f5;
+        }
+
+        .shell {
+            position: fixed;
+            width: 84px;
+            height: 100%;
+            background: #fff;
+            z-index: 9999;
+            transition: width 0.5s;
+            padding-left: 10px;
+            overflow: hidden;
+        }
+
+        .shell:hover {
+            width: 300px;
+        }
+
+        .imageBox {
+            position: relative;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+
+        .imageBox img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .shell ul {
+            position: relative;
+            height: 100vh;
+        }
+
+        .shell ul li {
+            position: relative;
+            padding: 5px;
+        }
+
+        .active {
+            background: #e4e9f5;
+            border-top-left-radius: 50px;
+            border-bottom-left-radius: 50px;
+        }
+
+        .active::before {
+            content: "";
+            position: absolute;
+            top: -30px;
+            right: 0;
+            width: 30px;
+            height: 30px;
+            border-bottom-right-radius: 25px;
+            box-shadow: 5px 5px 0 5px #e4e9f5;
+            background: transparent;
+        }
+
+        .active::after {
+            content: "";
+            position: absolute;
+            bottom: -30px;
+            right: 0;
+            width: 30px;
+            height: 30px;
+            border-top-right-radius: 25px;
+            box-shadow: 5px -5px 0 5px #e4e9f5;
+            background: transparent;
+        }
+
+        #logo {
+            margin: 40px 0 100px 0;
+        }
+
+        .shell ul li a {
+            position: relative;
+            display: flex;
+            white-space: nowrap;
+        }
+
+        .icon {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-width: 60px;
+            padding-left: 10px;
+            height: 70px;
+            color: #333;
+            transition: 0.5s;
+            color: rgb(110, 90, 240);
+        }
+
+        .icon i {
+            font-size: 30px;
+            z-index: 999;
+        }
+
+        .text {
+            position: relative;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            font-size: 20px;
+            color: #333;
+            padding-left: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: 0.5s;
+        }
+
+        .shell ul li:hover a .icon,
+        .shell ul li:hover a .text {
+            color: #ffa117;
+        }
+
+        .active a .icon::before {
+            content: "";
+            position: absolute;
+            inset: 5px;
+            width: 60px;
+            background: #fff;
+            border-radius: 50%;
+            transition: 0.5s;
+            border: 7px solid rgb(110, 90, 240);
+            box-sizing: border-box;
+        }
+    </style>
+    <link href="{{ url_for('static',filename='layui/css/layui.css') }}" rel="stylesheet">
+    <script src="{{ url_for('static',filename='/layui/layui.js') }}"></script>
+    <script src="{{ url_for('static', filename='jquery/jquery.js') }}"></script>
+    <script src="{{ url_for('static', filename='echarts/echarts.js') }}"></script>
+</head>
+<body>
+
+<div class="layui-container" style="display: flex;width: 100%;height: 100vh;">
+    <div class="shell">
+        <ul class="nav">
+
+            <li id="logo" class="loop-items">
+                <a href="#" data-url="{{ url_for('managehome.membermanage') }}">
+                    <div class="icon">
+                        <div class="imageBox">
+                            <img src="{{ url_for('static',filename='img/拉菲.jpg') }}" alt="">
+                        </div>
+                    </div>
+                    <div class="text">成员架构</div>
+                </a>
+            </li>
+
+            <li class="loop-items">
+                <a href="#home" data-url="{{ url_for('managehome.shopmanage') }}">
+                    <div class="icon">
+                        <i class="iconfont icon-cangku"></i>
+                    </div>
+                    <div class="text">店铺管理</div>
+                </a>
+            </li>
+
+            <li class="loop-items">
+                <a href="#theme" data-url="{{ url_for('managehome.productmanage') }}">
+                    <div class="icon">
+                        <i class="iconfont icon-zhuti_tiaosepan"></i>
+                    </div>
+                    <div class="text">产品管理</div>
+                </a>
+            </li>
+
+            <li class="loop-items">
+                <a href="#wallet" data-url="{{ url_for('managehome.groupshow') }}">
+                    <div class="icon">
+                        <i class="iconfont icon-qianbao"></i>
+                    </div>
+                    <div class="text">组织架构</div>
+                </a>
+            </li>
+
+
+            <li>
+                <a href="{{ url_for('main.re_index') }}" target="_blank">
+                    <div class="icon">
+                        <div class="imageBox">
+                            <img src="{{ url_for('static',filename='img/拉菲.jpg') }}" alt="">
+                        </div>
+                    </div>
+                    <div class="text">回到首页</div>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="layui-container " id="main-container"
+         style="flex-grow: 1; overflow-y: auto; height: 100%; background-color: rgba(255, 255, 255, 0.1); padding: 28px;">
+        <!-- 内容将在这里显示 -->
+        <div id="content-area" style="width: 100%;height: 100%">
+            <video width="100%" height="auto" autoplay loop muted>
+                <source src="{{ url_for('static',filename='video/米塔.mp4') }}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+    </div>
+
+</div>
+
+<script>
+
+    let nav = document.querySelectorAll(".nav li");
+
+    function activeLink() {
+        nav.forEach((item) => item.classList.remove("active"));
+        this.classList.add("active");
+    }
+
+    const shell = document.querySelector('.shell');
+    const mainContainer = document.getElementById('main-container');
+
+    // 定义鼠标悬停时的函数
+    function onShellHover() {
+        mainContainer.style.marginLeft = '305px';
+    }
+
+    // 定义鼠标离开时的函数
+    function onShellLeave() {
+        mainContainer.style.marginLeft = '100px'; // 或者设置为原来的值
+    }
+
+    // 添加事件监听器
+    shell.addEventListener('mouseenter', onShellHover);
+    shell.addEventListener('mouseleave', onShellLeave);
+
+    nav.forEach((item) => item.addEventListener("click", activeLink));
+    // 给所有的导航链接添加点击事件
+    document.querySelectorAll('.loop-items a').forEach(function (link) {
+        link.addEventListener('click', function (e) {
+            e.preventDefault(); // 阻止默认的链接跳转行为
+            var url = this.getAttribute('data-url'); // 获取链接对应的URL
+            console.log(e)
+            console.log(url)
+            loadContent(url); // 加载内容到右侧容器
+        });
+    });
+
+    // 加载内容到右侧容器的函数
+    function loadContent(url) {
+        var contentArea = document.getElementById('content-area');
+        // 这里可以根据实际情况使用不同的方法加载内容
+        // 例如，可以通过AJAX请求获取内容，然后插入到contentArea中
+        // 或者直接将iframe的src设置为指定的URL
+        var iframe = document.createElement('iframe');
+        iframe.src = url;
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = 'none';
+        contentArea.innerHTML = ''; // 清空当前内容
+        contentArea.appendChild(iframe); // 将新的iframe添加到容器中
+    }
+</script>
+</body>
+</html>

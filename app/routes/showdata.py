@@ -53,7 +53,6 @@ def getdata():
         result_data={
             "code": 0,
             "msg": "",
-
             "count": sp_data.total,
             "data": [i.to_dict() for i in sp_data.items]
         }

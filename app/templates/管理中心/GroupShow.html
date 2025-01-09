@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>组织架构</title>
+  <!-- 请勿在项目正式环境中引用该 layui.css 地址 -->
+  <link href="//unpkg.com/layui@2.9.21-rc/dist/css/layui.css" rel="stylesheet">
+</head>
+<body>
+
+<table class="layui-hide" id="user-tree" style="margin: auto"></table>
+
+<script type="text/html" id="treeTable-header">
+  <div class="layui-btn-container">
+    <button class="layui-btn layui-btn-sm" lay-event="getChecked">获取选中数据</button>
+  </div>
+</script>
+
+<!-- 请勿在项目正式环境中引用该 layui.js 地址 -->
+<script src="{{ url_for('static', filename='layui/layui.js') }}"></script>
+<script src="{{ url_for('static', filename='jquery/jquery.js') }}"></script>
+
+    <!-- 导入CSS文件 -->
+<link rel="stylesheet" href="{{ url_for('static', filename='layui/css/layui.css') }}">
+<script>
+layui.use(['treeTable'],function(){
+    var treeTable = layui.treeTable;
+    var layer = layui.layer;
+    var dropdown = layui.dropdown;
+    var url_data = '{{ url_for("managehome.getusertree") }}'+'?username=root'
+    // 渲染
+    var inst = treeTable.render({
+        elem: '#user-tree',
+        url: url_data, // 此处为静态模拟数据，实际使用时需换成真实接口
+        tree: {
+            idName: 'user_id', // 数据中节点的唯一标识字段名
+            childName: 'children', // 数据中子节点数组的字段名
+            showLine: true, // 是否显示连接线
+            iconIndex: 2 // 展开/折叠图标所在列索引，默认为 0
+        },
+        //maxHeight: '501px',
+        toolbar: '#TPL-treeTable-demo',
+        cols: [[
+            {type: 'checkbox', fixed: 'left'},
+            {field: 'user_id', title: 'ID', width: 80, sort: true, fixed: 'left'},
+            {field: 'name', title: '用户名', width: 180, fixed: 'left',edit: 'text'},
+            {field:'user_level',title:'用户等级',width:120,fixed:'left'},
+            {field: 'father_name', title: '上级', width: 80, sort: true},
+            {field: 'create_time', title: '创建时间', width: 180, sort: true},
+        ]],
+        page: true
+    });
+
+    //表头工具栏事件
+    treeTable.on('toolbar(treeTable-header)',function (obj) {
+        var config = obj.config;
+        var tableId = config.id;
+        var status = treeTable.checkStatus(tableId);
+        // 获取选中行
+        if (obj.event === "getChecked") {
+            if (!status.data.length) return layer.msg('无选中数据');
+            console.log(status);
+            layer.alert("当前数据选中已经输出到控制台，<br>您可按 F12 从控制台中查看结果。");
+        }
+    });
+    //行操作事件
+});
+</script>
+
+</body>
+</html>

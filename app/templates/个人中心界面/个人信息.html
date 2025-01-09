@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>个人信息</title>
+    <link href="{{ url_for('static',filename='layui/css/layui.css') }}" rel="stylesheet">
+    <script src="{{ url_for('static',filename='/layui/layui.js') }}"></script>
+    <script src="{{ url_for('static', filename='jquery/jquery.js') }}"></script>
+    <script src="{{ url_for('static', filename='echarts/echarts.js') }}"></script>
+    <style>
+    </style>
+</head>
+<body>
+    <div class="layui-panel" style="padding: 10px;">
+        <div class="layui-row layui-col-space12" style="height: 800px;background-image: linear-gradient(to bottom, rgba(255, 189, 215,1),rgba(221, 211, 255,1));">
+            <div class="layui-col-md4" >
+                <div class="grid-demo grid-demo-bg1">
+                    <h1>{{user}}</h1>
+                    <hr>
+                    <button id="change-password" type="button" class="layui-btn layui-btn-radius layui-btn-warm">修改密码</button>
+                </div>
+            </div>
+
+            <div class="layui-col-md8" >
+                {% if userlogs %}
+                    <h1 style="text-align: center">个人日志</h1>
+                    <hr>
+                    <div class="layui-timeline">
+                        {% for item in userlogs %}
+                            <div class="layui-timeline-item">
+                                <i class="layui-icon layui-timeline-axis"></i>
+                                <div class="layui-timeline-content layui-text">
+                                    <h3 class="layui-timeline-title">{{ item.date }}</h3>
+                                    <p>
+                                        <h4>{{ item.titile }}</h4>
+                                        {{ item.logdata }}
+                                    </p>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div style="float: right;">
+                        <button id="addtable" type="button" class="layui-btn layui-btn-radius layui-btn-warm">
+                            新建
+                        </button>
+                        <button id="changetable" type="button" class="layui-btn layui-btn-radius layui-btn-warm">
+                            编辑日志
+                        </button>
+                    </div>
+                {% else %}
+                    <button id="create_table" type="button" class="layui-btn layui-btn-radius layui-btn-warm" >创建日志</button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+<script>
+    console.log('{{ userlogs }}')
+    $(document).ready(function () {
+        // 为按钮点击事件绑定一个函数
+        $('#create_table').click(function () {
+            // 发起请求到服务器
+            $.ajax({
+                url: '{{url_for("userhome.createuserlog")}}',
+                type: 'POST',
+                success: function (data) {
+                    if(data['status']=='success'){
+                        window.alert(data['message']);
+                        window.location.reload();
+                    }else{
+                        window.alert('error:'+data['message']);
+                    }
+                },
+                error: function (error) {
+                    console.log(error)
+                }
+            });
+        });
+
+        $('#addtable').click(function (){
+            layer.open({
+                type: 1,
+                title: '新建日志',
+                area: ['auto', 'auto'],
+                content: '<form class="layui-form" lay-filter="form-1">\
+                  <input type="text" class="layui-input" lay-verify="email">\
+                  <input type="checkbox" lay-skin="switch" lay-filter="agree" title="同意">\
+                  <button class="layui-btn" lay-submit>提交</button>\
+                </form>',
+            });
+        })
+
+        $('#change-password').click(function (){
+            layer.open({
+                type: 1,
+                title: '修改密码',
+                area: ['600px', '500px'],
+                content: `
+                  <form class="layui-form" lay-filter="form-password" style="width: 80%; margin: auto">
+                    <br>
+                    <label class="layui-form-label">旧密码</label>
+                    <input name="oldpassword" class="layui-input" placeholder="请输入旧密码">
+                    <label class="layui-form-label">新密码</label>
+                    <input name="newpassword" class="layui-input" placeholder="请输入新密码">
+                    <br><hr>
+                    <button class="layui-btn" lay-submit lay-filter="submitpnewpassword">提交</button>
+                  </form>
+                  <script>
+                    layui.use(function () {
+                      var $ = layui.$;
+                      var form = layui.form;
+                      var layer = layui.layer;
+                      form.on("submit(submitpnewpassword)", function (data) {
+                        var field = data.field;
+                        console.log(field);
+                        layer.alert(JSON.stringify(field), {title: "当前填写的字段值"});
+                        $.ajax({
+                          url: '{{ url_for("userhome.change_password") }}',
+                          type: "POST",
+                          contentType: "application/json",
+                          data: JSON.stringify(field),
+                          dataType: "json",
+                          success: function (response) {
+                            alert("提交成功 " + JSON.stringify(response));
+                            window.location.reload();
+                          },
+                          error: function (error) {
+                            alert("提交失败 " + JSON.stringify(error));
+                          }
+                        });
+                        return false;
+                      });
+                    });
+                  <\/script>
+                `,
+                success: function (layero, index) {
+                    // 执行layui表单渲染
+                    layui.form.render();
+                }
+            });
+        })
+
+        $('#changetable').click(function (){
+            layer.open({
+                type: 1,
+                title: '编辑日志',
+                area: ['auto', 'auto'],
+                content: '<div style="padding: 16px;">test</div>'
+            });
+        })
+    });
+</script>
+</body>
+</html>
