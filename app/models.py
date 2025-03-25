@@ -50,6 +50,23 @@ class shopConfig(db.Model):
             'owner': self.owner,
         }
 
+class shop_sub_counrt(db.Model):
+    __tablename__='shop_sub_count'
+    id = db.Column(db.Integer, primary_key=True)
+    shop_name = db.Column(db.String(60),db.ForeignKey('shop_config.shop_name'))
+    user_name = db.Column(db.String(60),db.ForeignKey('users.user_name'))
+    create_user = db.Column(db.String(60),db.ForeignKey('users.user_name'))
+    create_time = db.Column(db.DateTime)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'shop_name': self.shop_name,
+            'user_name': self.user_name,
+            'create_time': self.create_time,
+            'create_user': self.create_user,
+        }
+
 class User_shop_relation(db.Model):
     __tablename__='user_shop_relation_config'
     id = db.Column(db.Integer, primary_key=True)
@@ -61,9 +78,62 @@ class ProductConfig(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     product_name = db.Column(db.String(60), nullable=False)
     product_id = db.Column(db.String(60), nullable=False)
-    shop_name = db.Column(db.String(60), nullable=False)
+    shop_name = db.Column(db.String(60), db.ForeignKey('shop_config.shop_name'),nullable=False)
     owner = db.Column(db.String(60),db.ForeignKey('users.user_name'), nullable=False)
     create_time = db.Column(db.DateTime)
+    product_code = db.Column(db.String(60), db.ForeignKey('product_code.product_code'))
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'product_name': self.product_name,
+            'shop_name': self.shop_name,
+            'product_id': self.product_id,
+            'shop_name': self.shop_name,
+            'owner': self.owner,
+            'create_time': self.create_time,
+            'product_code': self.product_code,
+        }
+
+class product_code(db.Model):
+    __tablename__='product_code'
+    id = db.Column(db.Integer, primary_key=True)
+    brand_name = db.Column(db.String(30), nullable=False)
+    product_code = db.Column(db.String(60), nullable=False,unique=True)
+    product_name = db.Column(db.String(60), nullable=False)
+    SetPrice = db.Column(db.Numeric(6,3), nullable=False)
+    FengXuWareHouse_price = db.Column(db.Numeric(6,3))
+    GuiZhouWareHouse_price = db.Column(db.Numeric(6,3))
+    WuHanWareHouse_price = db.Column(db.Numeric(6,3))
+    XiangTanWareHouse_price = db.Column(db.Numeric(6,3))
+    YiCangWareHouse_price = db.Column(db.Numeric(6,3))
+    GuangZhouWareHouse_price = db.Column(db.Numeric(6,3))
+    ShenYangWareHouse_price = db.Column(db.Numeric(6,3))
+    Special_price=db.Column(db.Numeric(6,3))
+    comment=db.Column(db.String(1000))
+    create_time = db.Column(db.DateTime,nullable=False)
+    update_time = db.Column(db.DateTime,nullable=False)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'brand_name': self.brand_name,
+            'product_code': self.product_code,
+            'product_name': self.product_name,
+            'SetPrice': self.SetPrice,
+            'FengXuWareHouse_price': self.FengXuWareHouse_price,
+            'GuiZhouWareHouse_price': self.GuiZhouWareHouse_price,
+            'WuHanWareHouse_price':self.WuHanWareHouse_price,
+            'XiangTanWareHouse_price': self.XiangTanWareHouse_price,
+            'YiCangWareHouse_price':self.YiCangWareHouse_price,
+            'GuangZhouWareHouse_price':self.GuangZhouWareHouse_price,
+            'ShenYangWareHouse_price':self.ShenYangWareHouse_price,
+            'Special_price':self.Special_price,
+            'comment':self.comment,
+            'create_time': datetime.datetime.strftime(self.create_time,'%Y-%m-%d %H:%M:%S'),
+            'update_time': datetime.datetime.strftime(self.update_time,'%Y-%m-%d %H:%M:%S'),
+        }
+
 
 class Productpnl(db.Model):
     __tablename__='productpnl'
@@ -145,19 +215,19 @@ def get_all_children(session, node_name):
     },all_len
 
 def get_all_childrenlist(session,node_name):
-    node_list = [[node_name]]
+    node_list = [node_name]
     reslist = []  # 使用集合来避免重复
     while node_list:
         child_list=[]
         for i in node_list:
-            child_list.extend([{j.user_name:''} for j in session.query.filter_by(father_name=i).all()])
-            print(child_list)
+            child_list.extend([j.user_name for j in session.query.filter_by(father_name=i).all()])
+            #print(child_list)
         if not child_list:
             break
         reslist.extend(child_list)  # 添加新的子节点到结果集
         node_list = child_list  # 更新下一轮的节点列表
-
-    return list(reslist)
+    print(list(set(reslist)))
+    return list(set(reslist))
 
 def get_shop(shop_name):
     class Shop_Temp(db.Model):

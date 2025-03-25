@@ -24,7 +24,7 @@ def create_app():
     app = Flask(__name__)
     secrets_temp=secrets.token_hex(16)
     app.config['SECRET_KEY']=secrets_temp
-    url = 'mysql+pymysql://duoduo:duoduo20241204baiyang%40_.@192.168.1.148:3306/pdd_data'
+    url = 'mysql+pymysql://duoduo:duoduo20241204baiyang%40_.@192.168.1.170:3306/pdd_data'
     app.config['SQLALCHEMY_DATABASE_URI'] = url
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.init_app(app)

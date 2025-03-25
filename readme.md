@@ -8,12 +8,30 @@
         (1)login.login:如果是get请求，则返回登录界面的html，如果是post请求，则会想服务端提交当前界面填写的账号密码信息。
         (2)login.return_user:测试所有用户
         (3)login.loginout:推出当前推出的用户
-    3、管理中心(managehome.py):
-        (1)managehome.managehome:返回管理中心的html文件。
-        (2)managehome.getusertree:如果是get请求，则返回当前用户和用户所有的子、孙节点。如果是post请求，则按照对应的请求更改对应的行数据到数据库。
-        (3)managehome.changeuser:更改用户数据的请求。（待制作）
-        (4)managehome.deleteuser：post，删除对应的行，如果有关联其他的表则会报错。
-        (5)managehome。
+    3、管理中心(managehome.py,Blueprint=managehome):
+        (1)managehome:返回整个管理中心的界面
+        (2)membermanage:返回成员管理的界面
+        (3)shopmanage:返回店铺管理界面
+        (4)shopmanageupdate:店铺管理数据更新的接口
+        (5)shopmanagedelete:店铺管理删除数据的接口
+        (6)shopmanageadd:店铺管理添加数据的接口
+        (7)shopmanagesub:返回店铺子账号管理的界面
+        (8)shopmanageaddsub:增加店铺子账号接口
+        (9)shopmanagedeletesub:删除店铺子账号接口
+        (10)productmanage:返回产品管理界面
+        (11)productmanageupdate:产品更新接口
+        (12)productmanagedelete:产品删除接口
+        (13)productmanageadd:产品添加的接口
+        (14)groupshow:用户分组数据接口
+        (15)getusertree:获取当前用户的树表数据，post的话新增用户
+        (16)deleteuser:删除用户接口
+        (17)getshop:获取店铺数据
+        (18)getshopsub:获取店铺子账号的数据
+        (19)productcodemanage:返回编码数据界面
+        (20)productcodemanageupdate：更新编码数据
+        (21)productcodemanagedelete：删除编码数据
+        (22)productcodemanageadd：添加编码数据
+        (23)productcodemanagedata：返回编码数据的数据
     4、数据中心(data.py)：
         (1)datahome.datahome:暂时没用上
         (2)datahome.get_data:获取数据从数据库中，包含有产品id参数、获取的数量、获取的列属性。

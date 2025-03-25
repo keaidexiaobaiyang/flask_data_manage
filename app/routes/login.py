@@ -40,14 +40,6 @@ def login():
     return render_template('login.html')
 
 
-@login_bp.route('/users')
-def return_user():
-    users = users.query.all()
-    print(1,type(users))
-    print([[i.owner,i.user_name,i.user_password] for i in users])
-    print(users)
-    return str(users)
-
 @login_bp.route('/loginout')
 @login_required
 def loginout():

@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>店铺管理</title>
+    <title>产品编码</title>
     <!-- 请勿在项目正式环境中引用该 layui.css 地址 -->
     <link href="{{ url_for('static',filename='layui/css/layui.css') }}" rel="stylesheet">
     <script src="{{ url_for('static',filename='/layui/layui.js') }}"></script>
@@ -20,20 +20,26 @@
 
 <form class="layui-form layui-row layui-col-space16" >
     <br>
-    <div class="layui-col-md6">
+    <div class="layui-col-md4">
         <div class="layui-input-wrap" style="width: 80%;margin: auto;">
-            <input type="text" name="店铺名" value="" placeholder="店铺名" class="layui-input" lay-affix="clear" style="background: rgba(255,255,255,0.6)">
+             品牌名 <input type="text" name="brandname" value="" placeholder="品牌名" class="layui-input" lay-affix="clear" style="background: rgba(255,255,255,0.6)">
         </div>
     </div>
 
-    <div class="layui-col-md6" >
+    <div class="layui-col-md4" >
         <div class="layui-input-wrap" style="width: 80%;margin: auto">
-            <input type="text" name="用户" placeholder="用户" lay-affix="clear" class="layui-input" style="background: rgba(255,255,255,0.6)">
+             编码名 <input type="text" name="codename" placeholder="编码名" lay-affix="clear" class="layui-input" style="background: rgba(255,255,255,0.6)">
+        </div>
+    </div>
+
+    <div class="layui-col-md4" >
+        <div class="layui-input-wrap" style="width: 80%;margin: auto">
+             产品名 <input type="text" name="productname" placeholder="产品名" lay-affix="clear" class="layui-input" style="background: rgba(255,255,255,0.6)">
         </div>
     </div>
 
 
-    <div class="layui-col-md6" style="display: flex; justify-content: center;">
+    <div class="layui-col-md12" style="display: flex; justify-content: center;">
         <button class="layui-btn" lay-submit lay-filter="table-search">搜索</button>
         <button type="reset" class="layui-btn layui-btn-primary" style="background: rgba(255,142,165,0.9)">清空</button>
     </div>
@@ -43,7 +49,7 @@
 
 
 <div style="padding: 16px;">
-    <table class="layui-hide" id="shoptable" style="background:azure" ></table>
+    <table class="layui-hide" id="codetable" style="background:azure" ></table>
 </div>
 
 
@@ -51,28 +57,17 @@
     <div class="layui-btn-container">
         <button class="layui-btn layui-btn-sm" lay-event="add">添加</button>
         <button class="layui-btn layui-btn-sm" lay-event="delete">删除</button>
+        <button class="layui-btn layui-btn-sm" lay-event="upload">上传文件</button>
     </div>
 </script>
 
 <script type="text/html" id="data_edit">
     <div class="layui-clear-space">
         <a class="layui-btn layui-btn-xs" lay-event="admit">提交</a>
-        <a class="layui-btn layui-btn-xs" lay-event="show_sub">查看子账号</a>
+        <a class="layui-btn layui-btn-xs" lay-event="remark">查看备注</a>
     </div>
 </script>
 
-<script type="text/html" id="selectuser">
-    <select name="owner" lay-filter="select-user" lay-append-to="body">
-        <option value="">row.owner</option>
-        {% for i in users %}
-            <optgroup label="{{ i[0] }}组">
-                {% for j in i %}
-                    <option value="{{ j }}">{{ j }}</option>
-                {% endfor %}
-            </optgroup>
-        {% endfor %}
-    </select>
-</script>
 
 <script>
     layui.use(function () {
@@ -82,18 +77,26 @@
         // 创建表格实例
         table.render({
             toolbar: '#header-event',
-            elem: '#shoptable',
-            id:'shoptable',
-            url: '{{ url_for("managehome.getshop") }}', // 此处为静态模拟数据，实际使用时需换成真实接口
+            elem: '#codetable',
+            id:'codetable',
+            url: '{{ url_for("managehome.productcodemanagedata") }}', // 此处为静态模拟数据，实际使用时需换成真实接口
             cols: [[
                 {type: 'checkbox', title: '选择框', fixed: true,},
-                {field: 'id', title: 'ID', width: '10%', sort: true, fixed: true},
-                {field: 'shop_name', title: '店铺名', width: '20%',edit:true},
-                {field: 'create_user', title: '创建人', width: '10%'},
-                {field:'create_time',title: '创建时间',width:'20%'},
-                {field: 'owner', title: '主持有者', width: '20%',templet: function(d) {
-                    return $('#selectuser').html().replace('row.owner', d.owner);
-        }},
+                {field: 'id', title: 'ID', width: 60, sort: true, fixed: true},
+                {field: 'brand_name', title: '品牌', width: 60,edit:true},
+                {field: 'product_code', title: '产品编码', width: 100},
+                {field: 'product_name',title: '产品名',width:80,edit:true},
+                {field: 'SetPrice', title: '设置价格', width: 100,edit:true,sort:true},
+                {field: 'create_time', title: '创建时间', width: 220},
+                {field: 'update_time', title: '最后更新时间', width: 220},
+                {field: 'FengXuWareHouse_price', title: '峰旭仓价格', width: 110,edit:true},
+                {field: 'GuiZhouWareHouse_price', title: '贵州仓价格', width: 110,edit:true},
+                {field: 'WuHanWareHouse_price', title: '武汉仓价格', width: 110,edit:true},
+                {field: 'XiangTanWareHouse_price', title: '湘潭仓价格', width: 110,edit:true},
+                {field: 'YiCangWareHouse_price', title: '宜昌仓价格', width: 110,edit:true},
+                {field: 'GuangZhouWareHouse_price', title: '广州仓价格', width: 110,edit:true},
+                {field: 'ShenYangWareHouse_price', title: '沈阳云仓价格', width: 120,edit:true},
+                {field: 'Special_price', title: '特价', width: 80,edit:true},
                 {fixed: 'right', title: '操作',width: '15%', templet: '#data_edit'}
             ]],
             page:true,
@@ -119,16 +122,6 @@
                     var index = $(elem).closest('tr').data('index');
                     return table.cache[tableId][index] || {};
                 };
-
-                form.on('select(select-user)', function (obj) {
-                    var value = obj.value; // 获取选中项 value
-                    // 获取当前行数据(如 id 等字段，以作为数据修改的索引)
-                    var data = table.getRowData(options.id, obj.elem);
-                    // 更新数据中对应的字段
-                    data.owner = value;
-                    // 显示当前行最新数据 - 仅用于示例展示
-                    console.log(data);
-                });
             }
         });
         // 搜索提交
@@ -136,7 +129,7 @@
             var field = data.field; // 获得表单字段
             console.log(field)
             // 执行搜索重载
-            table.reload('shoptable', {
+            table.reload('codetable', {
                 page: {
                     curr: 1, // 重新从第 1 页开始
                     limit: 10
@@ -147,7 +140,7 @@
             return false; // 阻止默认 form 跳转
         });
 
-        table.on('toolbar(shoptable)',function (obj) {
+        table.on('toolbar(codetable)',function (obj) {
             var options = obj.config; // 获取当前表格属性配置项
             var checkStatus = table.checkStatus(options.id); // 获取选中行相关数据
             //console.log(obj); // 查看对象所有成员
@@ -202,7 +195,7 @@
                 }
                 case 'delete': {
                     console.log(checkStatus);
-                    var log_data = '确认删除下列店铺吗？\n';
+                    var log_data = '确认删除下列编码吗？\n';
                     var shop_list = ''
                     for (let i = 0; i < checkStatus['data'].length - 1; i++) {
                         shop_list = shop_list + checkStatus['data'][i]['shop_name'] + '\n';
@@ -234,6 +227,10 @@
                             layer.close(index);
                         });
                     }
+                    break;
+                }
+                case 'upload':{
+                    layer.alert('上传文件');
                     break;
                 }
             }
@@ -270,7 +267,7 @@
                     })
                     break;
                 }
-                case 'show_sub':{
+                case 'remark':{
                     layer.open({
                         type: 2,
                         title: '子账号信息',

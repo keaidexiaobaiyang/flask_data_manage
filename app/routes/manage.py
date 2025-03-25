@@ -4,7 +4,7 @@ from json import JSONDecodeError
 from flask import Blueprint, render_template,request,jsonify, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import login_required,current_user
-from app.models import users,Productpnl,get_all_children,db,shopConfig
+from app.models import users,Productpnl,get_all_children,db,shopConfig,shop_sub_counrt,product_code,get_all_childrenlist,ProductConfig
 from sqlalchemy import and_
 import datetime
 import requests as rq
@@ -113,21 +113,25 @@ def shopmanagedelete():
             print(ex)
             return jsonify({'status2': 'error','message': 'An internal error occurred'}), 400
 
+#添加店铺信息
 @managehome_bp.route('/managehome/shopmanageadd',methods=['GET','POST'])
 def shopmanageadd():
     if request.method == 'POST':
         try:
             data = request.get_json()
             print(data,type(data))
-            _, all_user = get_all_children(users, current_user.user_name)
-            if data['owner'] not in all_user:
+            user_flag = users.query.filter_by(user_name=data['owner']).first()
+            shop_flag = shopConfig.query.filter_by(shop_name=data['shop_name']).first()
+            if not user_flag:
                 return jsonify({'message': '用户不存在'}), 400
+            elif shop_flag:
+                return jsonify({'message': '店铺已存在'}), 400
             else:
                 user_new = shopConfig(
                     shop_name=data['shop_name'],
                     create_time=datetime.datetime.now(),
                     create_user=current_user.user_name,
-                    owner=data['owner']
+                    owner=data['owner'],
                 )
                 db.session.add(user_new)
                 db.session.commit()
@@ -144,12 +148,153 @@ def shopmanageadd():
             print(ex)
             return jsonify({'message': 'An internal error occurred'}), 400
 
+@managehome_bp.route('/managehome/shopmanagesub',methods=['GET','POST'])
+def shopmanagesub():
+    param = request.args
+    print(param)
+    shopname = '冰柠的小店'
+    if param:
+        if 'shopname' in param.keys():
+            shopname = param['shopname']
+    return render_template('管理中心/ShopSubManage.html', shopname=shopname)
+    # if request.method == 'get':
+    #     param=request.args.get('param')
+    #     if 'shopname' in param.keys():
+    #
+    #         shopname=param['shopname']
+    #     else:
+    #         shopname='冰柠的小店'
+    #     return render_template('管理中心/ShopSubManage.html',shopname=shopname)
+    # else:
+    #     return jsonify('sb')
+
+#添加子账号信息
+@managehome_bp.route('/managehome/shopmanageaddsub',methods=['GET','POST'])
+def shopmanageaddsub():
+    if request.method == 'POST':
+        try:
+            data = request.get_json()
+            print(data,type(data))
+            user_list=get_all_childrenlist(users,current_user.user_name)
+            user_flag = users.query.filter_by(user_name=data['user_name']).first()
+            shop_flag = shopConfig.query.filter_by(shop_name=data['shop_name']).first()
+            user_all = shop_sub_counrt.query.filter(and_(shop_sub_counrt.user_name == data['user_name'], shop_sub_counrt.shop_name == data['shop_name'])).first()
+            shop_flag_dict=shop_flag.to_dict()
+            print('shop_flag_dict',shop_flag_dict)
+            if shop_flag_dict['owner'] not in user_list:
+                return jsonify({'message': '您无权为不属于自己的店铺添加子账号'}), 400
+            if not user_flag:
+                return jsonify({'message': '用户不存在'}), 400
+            elif not shop_flag:
+                return jsonify({'message': '店铺不存在'}), 400
+            elif user_all:
+                return jsonify({'message': '该子账号已存在'}), 400
+            else:
+                sub_new = shop_sub_counrt(
+                    shop_name=data['shop_name'],
+                    create_time=datetime.datetime.now(),
+                    create_user=current_user.user_name,
+                    user_name=data['user_name'],
+                )
+                db.session.add(sub_new)
+                try:
+                    db.session.commit()
+                    return jsonify('修改成功'), 200
+                except Exception as e:
+                    print(e)
+                    db.session.rollback()
+                    return jsonify({'message': '上传数据库异常，已回滚'}), 400
+        except JSONDecodeError:
+            return jsonify({'message': 'Invalid JSON format'}), 400
+        except Exception as ex:
+            print(ex)
+            return jsonify({'message': f'An internal error occurred{ex}'}), 400
+
+#删除子账号信息
+@managehome_bp.route('/managehome/shopmanagedeletesub',methods=['GET','POST'])
+def shopmanagedeletesub():
+    if request.method == 'POST':
+        try:
+            data = request.get_json()
+            shop_list=data.split('\n')
+            _, all_user = get_all_children(users, current_user.user_name)
+            print(shop_list)
+            success_list=[]
+            fails_list=[]
+            if int(users.query.filter_by(user_name=current_user.user_name).first().to_dict()['user_level']) > 2:
+                return jsonify({'status2': 'error','message': '您的权限太低了，请联系您的上级删除'}),400
+            for i in shop_list:
+                query=shop_sub_counrt.query.filter_by(user_name=i).first()
+                print(query)
+                if query:
+                    try:
+                        db.session.delete(query)
+                        success_list.append(i)
+                        db.session.commit()
+                        print('删除成功')
+                    except Exception as e:
+                        print(e)
+                        db.session.rollback()
+                        fails_list.append(i)
+            return jsonify({'status2': 'success','message':f'成功的账号：{",".join(success_list)}\n,失败的账号：{",".join(fails_list)}'}), 200
+        except json.JSONDecodeError:
+            return jsonify({'status2': 'error','message': 'Invalid JSON format'}), 400
+        except Exception as ex:
+            print(ex)
+            return jsonify({'status2': 'error','message': 'An internal error occurred'}), 400
+
 #商品管理部分
 @managehome_bp.route('/managehome/productmanage')
 #@login_required
 def productmanage():
     return render_template('管理中心/ProductManage.html')
 
+#商品更新
+@managehome_bp.route('/managehome/productmanageupdate',methods=['GET','POST'])
+def productmanageupdate():
+    return '1'
+
+#商品删除
+@managehome_bp.route('/managehome/productmanagedelete',methods=['GET','POST'])
+def productmanagedelete():
+    return '2'
+
+#商品添加
+@managehome_bp.route('/managehome/productmanageadd',methods=['GET','POST'])
+def productmanageadd():
+    return '3'
+
+#返回编码中心
+@managehome_bp.route('/managehome/productcodemanage')
+def productcodemanage():
+    return render_template('管理中心/PruductCodeManage.html')
+
+#更新编码
+@managehome_bp.route('/managehome/productcodemanageupdate',methods=['GET','POST'])
+def productcodemanageupdate():
+    return '4'
+
+#删除编码
+@managehome_bp.route('/managehome/productcodemanagedelete',methods=['GET','POST'])
+def productcodemanagedelete():
+    return '5'
+
+#添加编码
+@managehome_bp.route('/managehome/productcodemanageadd',methods=['GET','POST'])
+def productcodemanageadd():
+    return '6'
+
+@managehome_bp.route('/managehome/productcodemanagedata',methods=['GET','POST'])
+def productcodemanagedata():
+    print(request.args)
+    query=product_code.query.paginate(page=int(request.args['page']), per_page=int(request.args['limit']) )
+    data=[i.to_dict() for i in query]
+    json_data=jsonify({
+        'code':0,
+        'count':query.total,
+        'data':data
+    })
+    return json_data
 #组织架构展示
 @managehome_bp.route('/managehome/groupshow')
 #@login_required
@@ -285,3 +430,44 @@ def getshop():
             'data':result_list,
         })
         return responses
+
+#获取店铺子账号信息
+@managehome_bp.route('/managehome/getshopsub',methods=['GET'])
+#@login_required
+def getshopsub():
+    if request.method == 'GET':
+        data=request.data
+        args=request.args
+        print(data,args)
+        query = []
+        if 'shopname' in args:
+            query.append(shop_sub_counrt.shop_name.like(f'%{args["shopname"]}%'))
+        if '用户' in args:
+            query.append(shop_sub_counrt.user_name.like(f'%{args["用户"]}%'))
+        print(query)
+        shopdata=shop_sub_counrt.query.filter(and_(*query)).paginate(page=int(request.args['page']), per_page=int(request.args['limit']) )
+        print(data)
+        result_list=[]
+        for i in shopdata:
+            temp=i.to_dict()
+            temp['create_time']=datetime.datetime.strftime(temp['create_time'],'%Y-%m-%d %H:%M:%S')
+            result_list.append(temp)
+        responses=jsonify({
+            "code": 0,
+            'count':shopdata.total,
+            'data':result_list,
+        })
+        print(responses)
+        return responses
+
+@managehome_bp.route('/managehome/getpruduct',methods=['GET'])
+def getpruduct():
+    if request.method == 'GET':
+        sql_data=ProductConfig.query.all()
+
+        data=jsonify({
+            "code": 0,
+            'count':len(sql_data),
+            'data':[i.to_dict() for i in sql_data],
+        })
+        return data

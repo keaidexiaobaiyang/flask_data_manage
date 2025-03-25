@@ -1,10 +1,265 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>产品管理中心</title>
+    <meta charset="utf-8">
+    <title>产品管理</title>
+    <!-- 请勿在项目正式环境中引用该 layui.css 地址 -->
+    <link href="{{ url_for('static',filename='layui/css/layui.css') }}" rel="stylesheet">
+    <script src="{{ url_for('static',filename='/layui/layui.js') }}"></script>
+    <script src="{{ url_for('static', filename='jquery/jquery.js') }}"></script>
+    <script src="{{ url_for('static', filename='echarts/echarts.js') }}"></script>
+    <style>
+        body {
+            background-image: linear-gradient(to bottom,rgba(48,255,221,0.1),rgba(190,240,255,0.1));
+            width:100%;
+        }
+    </style>
 </head>
 <body>
-产品管理中心
+
+
+<form class="layui-form layui-row layui-col-space16" >
+    <br>
+    <div class="layui-col-md6">
+        <div class="layui-input-wrap" style="width: 80%;margin: auto;">
+            <input type="text" name="shop_name" value="" placeholder="店铺名" class="layui-input" lay-affix="clear" style="background: rgba(255,255,255,0.6)">
+        </div>
+    </div>
+
+    <div class="layui-col-md6" >
+        <div class="layui-input-wrap" style="width: 80%;margin: auto">
+            <input type="text" name="user" placeholder="用户" lay-affix="clear" class="layui-input" style="background: rgba(255,255,255,0.6)">
+        </div>
+    </div>
+    <div class="layui-col-md6">
+        <div class="layui-input-wrap" style="width: 80%;margin: auto;">
+            <input type="text" name="product_name" value="" placeholder="产品名" class="layui-input" lay-affix="clear" style="background: rgba(255,255,255,0.6)">
+        </div>
+    </div>
+    <div class="layui-col-md6">
+        <div class="layui-input-wrap" style="width: 80%;margin: auto;">
+            <input type="text" name="product_id" value="" placeholder="产品id" class="layui-input" lay-affix="clear" style="background: rgba(255,255,255,0.6)">
+        </div>
+    </div>
+
+
+    <div class="layui-col-md6" style="display: flex; justify-content: center;">
+        <button class="layui-btn" lay-submit lay-filter="table-search">搜索</button>
+        <button type="reset" class="layui-btn layui-btn-primary" style="background: rgba(255,142,165,0.9)">清空</button>
+    </div>
+
+</form>
+
+
+
+<div style="padding: 16px;">
+    <table class="layui-hide" id="shoptable" style="background:azure" ></table>
+</div>
+
+
+<script type="text/html" id="header-event">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-sm" lay-event="add">添加</button>
+        <button class="layui-btn layui-btn-sm" lay-event="delete">删除</button>
+        <button class="layui-btn layui-btn-sm" lay-event="update">编辑</button>
+    </div>
+</script>
+
+<script type="text/html" id="data_edit">
+    <div class="layui-clear-space">
+        <a class="layui-btn layui-btn-xs" lay-event="admit">提交</a>
+    </div>
+</script>
+
+<script>
+    layui.use(function () {
+        var table = layui.table;
+        var form = layui.form;
+        var util = layui.util;
+        // 创建表格实例
+        table.render({
+            toolbar: '#header-event',
+            elem: '#shoptable',
+            id:'shoptable',
+            url: '{{ url_for("managehome.getpruduct") }}', // 此处为静态模拟数据，实际使用时需换成真实接口
+            cols: [[
+                {type: 'checkbox', title: '选择框', fixed: true,},
+                {field: 'id', title: 'ID', width: 60, sort: true, fixed: true},
+                {field: 'product_name', title: '产品名', width: 240,edit:true},
+                {field: 'product_id', title: '产品id', width: 160},
+                {field:'shop_name',title: '店铺名',width:160},
+                {field:'owner',title:'master',width:80},
+                {field: 'create_time', title: '创建时间', width: 100},
+                {field:'product_code',title:'产品编码',width:100},
+                {fixed: 'right', title: '操作',width: '10%', templet: '#data_edit'}
+            ]],
+            page:true,
+            limits:['10','20','50','100'],
+            height: 'full-116',
+            done: function () {
+                var options = this;
+                table.getRowData = function (tableId, elem) {
+                    var index = $(elem).closest('tr').data('index');
+                    return table.cache[tableId][index] || {};
+                };
+
+            }
+        });
+        // 搜索提交
+        form.on('submit(table-search)', function (data) {
+            var field = data.field; // 获得表单字段
+            console.log(field)
+            // 执行搜索重载
+            table.reload('shoptable', {
+                page: {
+                    curr: 1, // 重新从第 1 页开始
+                    limit: 10
+                },
+                where: field // 搜索的字段
+            });
+            layer.msg('搜索成功');
+            return false; // 阻止默认 form 跳转
+        });
+
+        table.on('toolbar(shoptable)',function (obj) {
+            var options = obj.config; // 获取当前表格属性配置项
+            var checkStatus = table.checkStatus(options.id); // 获取选中行相关数据
+            //console.log(obj); // 查看对象所有成员
+            switch (obj.event) {
+                case 'add': {
+                    layer.open({
+                        type: 1,
+                        title: '新增店铺',
+                        area: ['600px', '500px'],
+                        content: `
+                  <form class="layui-form" lay-filter="form-password" style="width: 80%; margin: auto">
+                    <br>
+                    <label class="layui-form-label">店铺名</label>
+                    <input name="shop_name" class="layui-input" placeholder="请输入店铺名">
+                    <label class="layui-form-label">持有者</label>
+                    <input name="owner" class="layui-input" placeholder="请输入持有者">
+                    <br><hr>
+                    <button class="layui-btn" lay-submit lay-filter="submitshop">提交</button>
+                  </form>
+                  <script>
+                    layui.use(function () {
+                      var $ = layui.$;
+                      var form = layui.form;
+                      var layer = layui.layer;
+                      form.on("submit(submitshop)", function (data) {
+                        var field = data.field;
+                        console.log(field);
+                        layer.alert(JSON.stringify(field), {title: "当前填写的字段值"});
+                        $.ajax({
+                          url: '{{ url_for("managehome.shopmanageadd") }}',
+                          type: "POST",
+                          contentType: "application/json",
+                          data: JSON.stringify(field),
+                          dataType: "json",
+                          success: function (response) {
+                            alert("提交成功 " + JSON.stringify(response));
+                            window.location.reload();
+                          },
+                          error: function (xhr) {
+                            alert("提交失败 " + xhr.responseJSON.message);
+                          }
+                        });
+                        return false;
+                      });
+                    });
+                  <\/script>
+                `,
+                        success: function (layero, index) {
+                            // 执行layui表单渲染
+                            layui.form.render();
+                        }
+                    });
+                    console.log(obj);
+                    break;
+                }
+                case 'delete': {
+                    console.log(checkStatus);
+                    var log_data = '确认删除下列店铺吗？\n';
+                    var shop_list = ''
+                    for (let i = 0; i < checkStatus['data'].length - 1; i++) {
+                        shop_list = shop_list + checkStatus['data'][i]['shop_name'] + '\n';
+                    }
+                    shop_list = shop_list + checkStatus['data'][checkStatus['data'].length - 1]['shop_name'];
+                    if (shop_list == '')
+                        layer.alert('未筛选店铺');
+                    else {
+                        layer.alert(log_data + shop_list, function (index) {
+                            $.ajax({
+                                url: '{{url_for("managehome.shopmanagedelete")}}',
+                                type: 'POST',
+                                contentType: 'application/json',
+                                data: JSON.stringify(shop_list),
+                                success: function (response) {
+                                    // 假设服务器返回的响应对象中有一个 `message` 属性包含反馈信息
+                                    alert('提交成功\n反馈信息: ' + response.message);
+                                    layer.alert('提交成功');
+                                },
+                                error: function (xhr) {
+                                    console.log('请求状态码:', xhr.status);
+                                    console.log('请求状态文本:', xhr.statusText);
+                                    console.log('响应文本:', xhr.responseText);
+                                    console.log('json文本:', xhr.responseJSON);
+                                    alert('请求失败\n错误信息: ' + xhr.responseJSON.message);
+                                    layer.alert('请求失败');
+                                }
+                            });
+                            layer.close(index);
+                        });
+                    }
+                    break;
+                }
+                case 'update': {
+                    layer.alert('放着，暂时没用');
+                    console.log(checkStatus);
+                    break;
+                }
+            }
+        })
+
+        table.on('tool(shoptable)',function (obj) {
+            var data=obj.data;
+            switch (obj.event) {
+                case 'admit': {
+                    layer.confirm('是否确认提交?',function (a) {
+                        console.log(data,typeof(data));
+                        layer.close(a);
+                        $.ajax({
+                            url: '{{url_for("managehome.shopmanageupdate")}}',
+                            type: 'POST',
+                            contentType: 'application/json',
+                            data: JSON.stringify(data),
+                            success: function (response) {
+                                console.log(response)
+                                alert('提交成功\n反馈信息: ' + JSON.stringify(response.data))
+                                layer.alert('提交成功');
+                                //console.log('Success:', response);
+                            },
+                            error: function (xhr) {
+                                alert('提交失败\n错误信息:'+JSON.stringify(xhr.responseJSON.error));
+                                layer.alert('提交失败');
+                            }
+                        });
+                        },
+                        function (a) {
+                        console.log(data);
+                        layer.close(a);
+                        layer.alert('已取消');
+                    })
+                    break;
+                }
+                case '':{
+                    break;
+                }
+            }
+        })
+
+    });
+</script>
+
 </body>
 </html>

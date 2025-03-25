@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>店铺管理</title>
+    <title>子账号管理</title>
     <!-- 请勿在项目正式环境中引用该 layui.css 地址 -->
     <link href="{{ url_for('static',filename='layui/css/layui.css') }}" rel="stylesheet">
     <script src="{{ url_for('static',filename='/layui/layui.js') }}"></script>
@@ -20,11 +20,6 @@
 
 <form class="layui-form layui-row layui-col-space16" >
     <br>
-    <div class="layui-col-md6">
-        <div class="layui-input-wrap" style="width: 80%;margin: auto;">
-            <input type="text" name="店铺名" value="" placeholder="店铺名" class="layui-input" lay-affix="clear" style="background: rgba(255,255,255,0.6)">
-        </div>
-    </div>
 
     <div class="layui-col-md6" >
         <div class="layui-input-wrap" style="width: 80%;margin: auto">
@@ -49,29 +44,15 @@
 
 <script type="text/html" id="header-event">
     <div class="layui-btn-container">
-        <button class="layui-btn layui-btn-sm" lay-event="add">添加</button>
-        <button class="layui-btn layui-btn-sm" lay-event="delete">删除</button>
+        <button class="layui-btn layui-btn-sm" lay-event="add_sub">添加子账号</button>
+        <button class="layui-btn layui-btn-sm" lay-event="del_sub">删除子账号</button>
     </div>
 </script>
 
 <script type="text/html" id="data_edit">
     <div class="layui-clear-space">
         <a class="layui-btn layui-btn-xs" lay-event="admit">提交</a>
-        <a class="layui-btn layui-btn-xs" lay-event="show_sub">查看子账号</a>
     </div>
-</script>
-
-<script type="text/html" id="selectuser">
-    <select name="owner" lay-filter="select-user" lay-append-to="body">
-        <option value="">row.owner</option>
-        {% for i in users %}
-            <optgroup label="{{ i[0] }}组">
-                {% for j in i %}
-                    <option value="{{ j }}">{{ j }}</option>
-                {% endfor %}
-            </optgroup>
-        {% endfor %}
-    </select>
 </script>
 
 <script>
@@ -84,17 +65,14 @@
             toolbar: '#header-event',
             elem: '#shoptable',
             id:'shoptable',
-            url: '{{ url_for("managehome.getshop") }}', // 此处为静态模拟数据，实际使用时需换成真实接口
+            url: '{{ url_for("managehome.getshopsub") }}'+'?shopname={{ shopname }}', // 此处为静态模拟数据，实际使用时需换成真实接口
             cols: [[
                 {type: 'checkbox', title: '选择框', fixed: true,},
                 {field: 'id', title: 'ID', width: '10%', sort: true, fixed: true},
                 {field: 'shop_name', title: '店铺名', width: '20%',edit:true},
-                {field: 'create_user', title: '创建人', width: '10%'},
+                {field: 'create_user', title: '创建人', width: '15%'},
                 {field:'create_time',title: '创建时间',width:'20%'},
-                {field: 'owner', title: '主持有者', width: '20%',templet: function(d) {
-                    return $('#selectuser').html().replace('row.owner', d.owner);
-        }},
-                {fixed: 'right', title: '操作',width: '15%', templet: '#data_edit'}
+                {field: 'user_name', title: '用户', width: '20%'},
             ]],
             page:true,
             css: [ // 设置单元格样式
@@ -152,7 +130,7 @@
             var checkStatus = table.checkStatus(options.id); // 获取选中行相关数据
             //console.log(obj); // 查看对象所有成员
             switch (obj.event) {
-                case 'add': {
+                case 'add_sub': {
                     layer.open({
                         type: 1,
                         title: '新增店铺',
@@ -160,23 +138,21 @@
                         content: `
                   <form class="layui-form" lay-filter="form-password" style="width: 80%; margin: auto">
                     <br>
-                    <label class="layui-form-label">店铺名</label>
-                    <input name="shop_name" class="layui-input" placeholder="请输入店铺名">
-                    <label class="layui-form-label">持有者</label>
-                    <input name="owner" class="layui-input" placeholder="请输入持有者">
+                    <label class="layui-form-label">用户名1</label>
+                    <input name="user_name" class="layui-input" placeholder="用户名1">
                     <br><hr>
                     <button class="layui-btn" lay-submit lay-filter="submitshop">提交</button>
                   </form>
                   <script>
                     layui.use(function () {
-                      var $ = layui.$;
                       var form = layui.form;
                       var layer = layui.layer;
                       form.on("submit(submitshop)", function (data) {
                         var field = data.field;
+                        field.shop_name='{{ shopname }}'
                         console.log(field);
                         $.ajax({
-                          url: '{{ url_for("managehome.shopmanageadd") }}',
+                          url: '{{ url_for("managehome.shopmanageaddsub") }}',
                           type: "POST",
                           contentType: "application/json",
                           data: JSON.stringify(field),
@@ -185,55 +161,64 @@
                             layer.alert('修改成功');
                           },
                           error: function (xhr) {
-                          layer.alert('修改失败'+xhr.responseJSON.message);
+                          layer.alert('修改失败，'+xhr.responseJSON.message);
                           }
                         });
+                        return false;
                       });
                     });
                   <\/script>
                 `,
                         success: function (layero, index) {
                             // 执行layui表单渲染
-                            layui.form.render();
+
                         }
                     });
-                    console.log(obj);
+                    table.reload('shoptable', {
+                        page: {
+                            curr: 1, // 重新从第 1 页开始
+                            limit: 10
+                        },
+                        where: field // 搜索的字段
+                    });
                     break;
                 }
-                case 'delete': {
+                case 'del_sub': {
                     console.log(checkStatus);
-                    var log_data = '确认删除下列店铺吗？\n';
-                    var shop_list = ''
+                    var log_data = '确认删除下列子账号吗？\n';
+                    var user_list = ''
                     for (let i = 0; i < checkStatus['data'].length - 1; i++) {
-                        shop_list = shop_list + checkStatus['data'][i]['shop_name'] + '\n';
+                        user_list = user_list + checkStatus['data'][i]['user_name'] + '\n';
                     }
-                    shop_list = shop_list + checkStatus['data'][checkStatus['data'].length - 1]['shop_name'];
-                    if (shop_list == '')
-                        layer.alert('未筛选店铺');
+                    user_list = user_list + checkStatus['data'][checkStatus['data'].length - 1]['user_name'];
+                    if (user_list == '')
+                        layer.alert('未筛选用户');
                     else {
-                        layer.alert(log_data + shop_list, function (index) {
+                        layer.alert(log_data + user_list, function (index) {
                             $.ajax({
-                                url: '{{url_for("managehome.shopmanagedelete")}}',
+                                url: '{{url_for("managehome.shopmanagedeletesub")}}',
                                 type: 'POST',
                                 contentType: 'application/json',
-                                data: JSON.stringify(shop_list),
+                                data: JSON.stringify(user_list),
                                 success: function (response) {
                                     // 假设服务器返回的响应对象中有一个 `message` 属性包含反馈信息
-                                    alert('提交成功\n反馈信息: ' + response.message);
-                                    layer.alert('提交成功');
+                                    layer.alert('提交成功\n反馈信息: ' + response.message);
                                 },
                                 error: function (xhr) {
-                                    console.log('请求状态码:', xhr.status);
-                                    console.log('请求状态文本:', xhr.statusText);
-                                    console.log('响应文本:', xhr.responseText);
-                                    console.log('json文本:', xhr.responseJSON);
-                                    alert('请求失败\n错误信息: ' + xhr.responseJSON.message);
+                                    layer.alert('请求失败\n错误信息: ' + xhr.responseJSON.message);
                                     layer.alert('请求失败');
                                 }
                             });
                             layer.close(index);
                         });
                     }
+                    table.reload('shoptable', {
+                        page: {
+                            curr: 1, // 重新从第 1 页开始
+                            limit: 10
+                        },
+                        where: field // 搜索的字段
+                    });
                     break;
                 }
             }
@@ -270,16 +255,7 @@
                     })
                     break;
                 }
-                case 'show_sub':{
-                    layer.open({
-                        type: 2,
-                        title: '子账号信息',
-                        shadeClose: true,
-                        maxmin: true, //开启最大化最小化按钮
-                        area: ['900px', '600px'],
-                        content:'{{ url_for("managehome.shopmanagesub") }}'+'?shopname='+data.shop_name,
-                    });
-                    //console.log(data)
+                case '':{
                     break;
                 }
             }
